@@ -2,9 +2,9 @@
 //Destructured
 function TodoListItem({todo}){
     return (
-        <div>
+        <li>
             {todo.id} {todo.title}
-        </div>
+        </li>
     );
 }
 
