@@ -3,7 +3,7 @@
 function TodoListItem({todo}){
     return (
         <li>
-            {todo.id} {todo.title}
+            {todo.title}
         </li>
     );
 }
