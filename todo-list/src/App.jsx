@@ -3,22 +3,26 @@ import TodoList from './TodoList.jsx';
 import TodoForm from './TodoForm.jsx';
 import './App.css'
 
-const todos = [
-  {id: 1, title: "review resources"},
-  {id: 2, title: "take notes"},
-  {id: 3, title: "code out app"}
-]
 function App() {
+  //update initial state
+  const [todoList, setTodoList] = useState([]);
   
-  const [todoList, setTodoList] = useState(todos);
+  //create the add todo handler
+  function addTodo(todoTitle){
+    const todo = {id: Date.now(), title: todoTitle}
+    setTodoList(todoList => [todo, ...todoList])
+  }
 
   return (
     <div>
       <h1>My Todos</h1>
-      <TodoForm />
+
+      {/* pass the handler to TodoForm */}
+      <TodoForm onAddTodo={addTodo} />
       <TodoList todoList={todoList} />
     </div>
   )
 }
 
 export default App
+
