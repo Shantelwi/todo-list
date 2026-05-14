@@ -1,29 +1,57 @@
 //Destructured	
-import {useState} from 'react';
+import { useState } from 'react';
 import TextInputWithLabel from '../../shared/TextInputWithLabel.jsx';
-function TodoListItem({todo, onCompleteTodo}){
+import { isValidTodoTitle } from '../../utils/todoValidation';
+
+function TodoListItem({ todo, onCompleteTodo, onUpdateTodo }) {
 	const [isEditing, setIsEditing] = useState(false);
-	    return (
-	        <li>
-				<form>
+
+	const [workingTitle, setWorkingTitle] = useState(todo.title);
+
+	const handleEdit = (e) => {
+		setWorkingTitle(e.target.value);
+	};
+
+	const handleCancel = () => {
+		setWorkingTitle(todo.title);
+		setIsEditing(false);
+	};
+
+	const handleUpdate = (e) => {
+		if (!isEditing) return;
+		e.preventDefault();
+
+		onUpdateTodo({
+			...todo,
+			title: workingTitle
+		});
+
+		setIsEditing(false);
+	}
+
+	return (
+		<li>
+			<form onSubmit={handleUpdate}>
 				{isEditing ? (
-					<TextInputWithLabel value={todo.title}/>
+					<TextInputWithLabel value={workingTitle} onChange={handleEdit} />
 				) : (
 					<>
 						<label>
-							<input 
-							type="checkbox"
-							id = {`checkbox${todo.id}`}
-							checked={todo.isCompleted}
-							onChange={()  => onCompleteTodo(todo.id)} 
+							<input
+								type="checkbox"
+								id={`checkbox${todo.id}`}
+								checked={todo.isCompleted}
+								onChange={() => onCompleteTodo(todo.id)}
 							/>
+							<span onClick={() => setIsEditing(true)}> {todo.title} </span>
 						</label>
-						<span onClick={() => setIsEditing(true)}> {todo.title} </span>
+						<button type='button' onClick={handleCancel}>Cancel</button>
+						<button type='submit' disabled={!isValidTodoTitle(workingTitle)}>update</button>
 					</>
 				)}
-				</form>
-   	        </li>
-   	    );
-   	}
-   	
+			</form>
+		</li>
+	);
+}
+
 export default TodoListItem;

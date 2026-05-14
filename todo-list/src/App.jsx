@@ -13,13 +13,23 @@ function App() {
     setTodoList(todoList => [todo, ...todoList])
   }
 
+  function updateTodo(editedTodo) {
+    setTodoList((prevTodos) => 
+      prevTodos.map((todo) => 
+        todo.id === editedTodo.id
+        ? { ...editedTodo}
+        : todo
+      )
+    );
+  }
+
   return (
     <div>
       <h1>My Todos</h1>
 
       {/* pass the handler to TodoForm */}
       <TodoForm onAddTodo={addTodo} />
-      <TodoList todoList={todoList} />
+      <TodoList todoList={todoList} onUpdateTodo = {updateTodo} />
     </div>
   )
 }
