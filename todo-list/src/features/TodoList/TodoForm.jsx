@@ -16,14 +16,6 @@ function TodoForm({ onAddTodo }) {
             setWorkingTodoTitle('');
             inputRef.current.focus();
         }
-
-        // const todoTitle = event.target.todoTitle.value.trim();
-        // if (todoTitle && todoTitle !== "") {
-        //     onAddTodo(todoTitle);
-        //     setWorkingTodoTitle('');
-        //     event.target.reset();
-        //     inputRef.current.focus();
-        // }
     };
     return (
         <form onSubmit={handleAddTodo}>
