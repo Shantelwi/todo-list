@@ -9,20 +9,8 @@ function App() {
   
   //create the add todo handler
   function addTodo(todoTitle){
-    const todo = {id: Date.now(), title: todoTitle, isCompleted: false}
+    const todo = {id: Date.now(), title: todoTitle}
     setTodoList(todoList => [todo, ...todoList])
-  }
-
-  function completeTodo(id){
-    const updateTodos = todoList.map((todo) => {
-      if (todo.id === id) {
-        return {...todo, isCompleted: true};
-      }else {
-        return todo;
-      }
-    });
-
-    setTodoList(updateTodos);
   }
 
   return (
@@ -31,9 +19,7 @@ function App() {
 
       {/* pass the handler to TodoForm */}
       <TodoForm onAddTodo={addTodo} />
-      <TodoList 
-      todoList={todoList}
-      onCompleteTodo = {completeTodo} />
+      <TodoList todoList={todoList} />
     </div>
   )
 }
