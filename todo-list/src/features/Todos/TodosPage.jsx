@@ -1,5 +1,6 @@
-import TodoList from './features/TodoList/TodoList.jsx';
-import TodoForm from './features/TodoForm.jsx';
+import { useState } from 'react';
+import TodoList from '../TodoList/TodoList.jsx';
+import TodoForm from '../Todos/TodoForm.jsx';
 
 
 function TodosPage() {
