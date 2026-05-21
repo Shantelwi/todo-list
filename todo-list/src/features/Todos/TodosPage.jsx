@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import TodoList from '../TodoList/TodoList.jsx';
+import TodoList from '../Todos/TodoList/TodoList.jsx';
 import TodoForm from './TodoForm.jsx';
 
 
