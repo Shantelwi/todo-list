@@ -1,41 +1,150 @@
 import { useEffect, useState } from 'react';
 import TodoList from '../TodoList/TodoList.jsx';
-import TodoForm from '../Todos/TodoForm.jsx';
+import TodoForm from './TodoForm.jsx';
 
 
 function TodosPage({ token }) {
     const [todoList, setTodoList] = useState([]);
 
-    const [error, setError] = useState([]);
+    const [error, setError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
 
-    //create the add todo handler
-    function addTodo(todoTitle) {
-        const todo = { id: Date.now(), title: todoTitle, isCompleted: false };
-        setTodoList(todoList => [todo, ...todoList]);
+    async function addTodo(todoTitle) {
+        const tempTodo = {
+            id: Date.now(),
+            title: todoTitle,
+            isCompleted: false,
+        };
+
+        setTodoList((prevTodos) => [tempTodo, ...prevTodos]);
+
+        try {
+            const response = await fetch('/api/tasks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    title: todoTitle,
+                    isCompleted: false,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to add todo');
+            }
+
+            const data = await response.json();
+
+            const newTask = data.task || data;
+
+            setTodoList(prev =>
+                prev.map(todo =>
+                    todo.id === tempTodo.id ? newTask : todo
+                )
+            );
+        } catch (error) {
+            setTodoList((prevTodos) =>
+                prevTodos.filter((todo) => todo.id !== tempTodo.id)
+            );
+
+            setError(error.message);
+        }
     }
 
-    function completeTodo(id) {
-        const updateTodo = todoList.map((todo) => {
+    async function completeTodo(id) {
+        const originalTodo = todoList.find(
+            (todo) => todo.id === id
+        );
+
+        const updatedTodos = todoList.map((todo) => {
             if (todo.id === id) {
-                return { ...todo, isCompleted: true };
-            } else {
-                return todo;
+                return {
+                    ...todo,
+                    isCompleted: true,
+                };
             }
+
+            return todo;
         });
 
-        setTodoList(updateTodo);
+        setTodoList(updatedTodos);
+
+        try {
+            const response = await fetch(`/api/tasks/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': token,
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    isCompleted: true,
+                }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to complete todo');
+            }
+        } catch (error) {
+            setTodoList((prevTodos) =>
+                prevTodos.map((todo) =>
+                    todo.id === id ? originalTodo : todo
+                )
+            );
+
+            setError(error.message);
+        }
     }
 
-    function updateTodo(editedTodo) {
-        const updateTodos = todoList.map((todo) => {
+    async function updateTodo(editedTodo) {
+        const originalTodo = todoList.find(
+            (todo) => todo.id === editedTodo.id
+        );
+
+        const updatedTodos = todoList.map((todo) => {
             if (todo.id === editedTodo.id) {
-                return { ...editedTodo };
-            } else {
-                return todo;
+                return editedTodo;
             }
+
+            return todo;
         });
-        setTodoList(updateTodos);
+
+        setTodoList(updatedTodos);
+
+        try {
+            const response = await fetch(
+                `/api/tasks/${editedTodo.id}`,
+                {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': token,
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify({
+                        title: editedTodo.title,
+                        isCompleted: editedTodo.isCompleted,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error('Failed to update todo');
+            }
+        } catch (error) {
+            setTodoList((prevTodos) =>
+                prevTodos.map((todo) =>
+                    todo.id === originalTodo.id
+                        ? originalTodo
+                        : todo
+                )
+            );
+
+            setError(error.message);
+        }
     }
 
     useEffect(() => {
@@ -73,22 +182,29 @@ function TodosPage({ token }) {
 
     return (
         <div>
-            {error && <p>{error}</p>}
-            {isTodoListLoading ? (
-                <p>Loading Todos...</p>
-            ) : (
+            {error && (
+                <div>
+                    <p>{error}</p>
 
-                <>
-                    <TodoForm onAddTodo={addTodo} />
-                    <TodoList
-                        todoList={todoList}
-                        onCompleteTodo={completeTodo}
-                        onUpdateTodo={updateTodo}
-                    />
-                </>
+                    <button onClick={() => setError('')}>
+                        Clear Error
+                    </button>
+                </div>
             )}
+
+            {isTodoListLoading && (
+                <p>Loading Todos...</p>
+            )}
+
+            <TodoForm onAddTodo={addTodo} />
+
+            <TodoList
+                todoList={todoList}
+                onCompleteTodo={completeTodo}
+                onUpdateTodo={updateTodo}
+            />
         </div>
-    )
+    );
 }
 
 export default TodosPage;
