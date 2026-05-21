@@ -5,18 +5,24 @@ import Logon from './features/Logon.jsx';
 import './App.css'
 
 function App() {
-  //update initial state
 
+  const [email, setEmail] = useState('');
+  const [token, setToken] = useState('');
+  
   return (
     <div>
-      <Header />
-      {!token ? (
+      <Header
+        token={token}
+        onSetToken={setToken}
+        onSetEmail={setEmail} 
+      />
+      {token ? (
+        <TodosPage token={token} />
+      ) : (
         <Logon
           onSetEmail={setEmail}
           onSetToken={setToken} 
         />
-      )  : (
-        <TodosPage />
       )}
     </div>
   );
