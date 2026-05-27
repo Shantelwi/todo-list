@@ -1,5 +1,5 @@
 export default function SortBy({
-    sortyBy,
+    sortBy,
     sortDirection,
     onSortByChange,
     onSortDirectionChange
@@ -9,7 +9,7 @@ export default function SortBy({
             <label htmlFor="sortBy">Sort By</label>
             <select 
                 id="sortBy"
-                value={sortyBy}
+                value={sortBy}
                 onChange={(e) => onSortByChange(e.target.value)}
             >
                 <option value="creationDate">Creation Date</option>
