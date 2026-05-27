@@ -8,14 +8,17 @@ function TodoList({
   onUpdateTodo
 }) {
   const filteredTodoList = useMemo(() => {
-    return todoList.filter (
-      (todo) => !todo.isCompleted
-    );
+    console.log(`Recalculating filtered todos (v${dataVersion})`);
+
+    return {
+      version: dataVersion,
+      todos: todoList.filter((todo) => !todo.isCompleted),
+    };
   }, [todoList, dataVersion]);
 
   return (
     <ul>
-      {filteredTodoList.map((todo) => (
+      {filteredTodoList.todos.map((todo) => (
         <TodoListItem
           key={todo.id}
           todo={todo}
