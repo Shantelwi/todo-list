@@ -14,6 +14,8 @@ function TodosPage({ token }) {
     const [error, setError] = useState('');
     const [isTodoListLoading, setIsTodoListLoading] = useState(false);
 
+    const [filterError, setFilterError] = useState('');
+
     const [filterTerm, setFilterTerm] = useState('');
     const debouncedFilterTerm = useDebounce(filterTerm, 300);
 
@@ -23,7 +25,7 @@ function TodosPage({ token }) {
         setDataVersion((prev) => prev + 1);
     }, []);
 
-    const handlerFilterChange = (newTerm)  => {
+    const handlerFilterChange = (newTerm) => {
         setFilterTerm(newTerm);
     }
 
@@ -201,8 +203,15 @@ function TodosPage({ token }) {
                 const data = await response.json();
 
                 setTodoList(data.tasks);
+                setFilterError('');
             } catch (error) {
-                setError(error.message);
+                if (debouncedFilterTerm || sortBy !== 'creationDate' || sortDirection !== 'desc') {
+                    setFilterError(
+                        `Error filtering/sorting todos: ${error.message}`
+                    );
+                } else {
+                    setError(error.message);
+                }
             } finally {
                 setIsTodoListLoading(false);
             }
@@ -210,7 +219,7 @@ function TodosPage({ token }) {
         if (token) {
             fetchTodos();
         }
-    }, [token, sortBy, sortDirection, debouncedFilterTerm]);
+    }, [token, sortBy, sortDirection, debouncedFilterTerm, dataVersion]);
 
     return (
         <div>
@@ -221,6 +230,21 @@ function TodosPage({ token }) {
                     <button onClick={() => setError('')}>
                         Clear Error
                     </button>
+                </div>
+            )}
+
+            {filterError && (
+                <div>
+                    <p>{filterError}</p>
+                    <button onClick={() => setFilterError('')}>Clear Filter Error</button>
+                    <button
+                        onClick={() => {
+                            setFilterTerm('');
+                            setSortBy('creationDate');
+                            setSortDirection('desc');
+                            setFilterError('');
+                        }}
+                    >Reset Filters</button>
                 </div>
             )}
 
@@ -236,8 +260,8 @@ function TodosPage({ token }) {
             />
 
             <FilterInput
-                filterTerm = {filterTerm}
-                onFilterChange = {handlerFilterChange}
+                filterTerm={filterTerm}
+                onFilterChange={handlerFilterChange}
             />
 
             <TodoForm onAddTodo={addTodo} />
