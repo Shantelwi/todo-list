@@ -1,32 +1,41 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useReducer } from 'react';
 import TodoList from '../Todos/TodoList/TodoList.jsx';
 import TodoForm from './TodoForm.jsx';
 import SortBy from '../../shared/SortBy.jsx';
 import useDebounce from '../../utils/useDebounce.js';
 import FilterInput from '../../shared/FilterInput.jsx';
+import { todoReducer, initialTodoState, TODO_ACTIONS } from "../../reducers/todoReducer.js";
 
 function TodosPage({ token }) {
-    const [todoList, setTodoList] = useState([]);
+    const [state, dispatch] = useReducer(todoReducer, initialTodoState);
 
-    const [sortBy, setSortBy] = useState('creationDate');
-    const [sortDirection, setSortDirection] = useState('desc');
+    const {
+        todoList,
+        error,
+        filterError,
+        isTodoListLoading,
+        sortBy,
+        sortDirection,
+        filterTerm,
+        dataVersion
+    } = state;
 
-    const [error, setError] = useState('');
-    const [isTodoListLoading, setIsTodoListLoading] = useState(false);
-
-    const [filterError, setFilterError] = useState('');
-
-    const [filterTerm, setFilterTerm] = useState('');
     const debouncedFilterTerm = useDebounce(filterTerm, 300);
 
-    const [dataVersion, setDataVersion] = useState(0);
-
     const invalidateCache = useCallback(() => {
-        setDataVersion((prev) => prev + 1);
-    }, []);
+        dispatch({
+            type: TODO_ACTIONS.UPDATE_TODO,
+            payload: {
+                dataVersion: state.dataVersion + 1,
+            },
+        });
+    }, [dispatch, state.dataVersion]);
 
     const handlerFilterChange = (newTerm) => {
-        setFilterTerm(newTerm);
+        dispatch({
+            type: TODO_ACTIONS.SET_FILTER,
+            payload: newTerm,
+        });
     }
 
     async function addTodo(todoTitle) {
@@ -175,8 +184,7 @@ function TodosPage({ token }) {
     useEffect(() => {
         async function fetchTodos() {
             try {
-                setIsTodoListLoading(true);
-                setError('');
+                dispatch({ type: TODO_ACTIONS.FETCH_START })
                 const paramsObject = {
                     sortBy,
                     sortDirection
@@ -202,15 +210,20 @@ function TodosPage({ token }) {
                 }
                 const data = await response.json();
 
-                setTodoList(data.tasks);
-                setFilterError('');
+                dispatch({
+                    type: TODO_ACTIONS.FETCH_SUCCESS,
+                    payload: data.tasks,
+                });
             } catch (error) {
                 if (debouncedFilterTerm || sortBy !== 'creationDate' || sortDirection !== 'desc') {
                     setFilterError(
                         `Error filtering/sorting todos: ${error.message}`
                     );
                 } else {
-                    setError(error.message);
+                    dispatch({
+                        type: TODO_ACTIONS.FETCH_ERROR,
+                        payload: error.message,
+                    });
                 }
             } finally {
                 setIsTodoListLoading(false);
@@ -227,7 +240,7 @@ function TodosPage({ token }) {
                 <div>
                     <p>{error}</p>
 
-                    <button onClick={() => setError('')}>
+                    <button onClick={() => dispatch({type: TODO_ACTIONS.CLEAR_ERROR})}>
                         Clear Error
                     </button>
                 </div>
@@ -239,10 +252,7 @@ function TodosPage({ token }) {
                     <button onClick={() => setFilterError('')}>Clear Filter Error</button>
                     <button
                         onClick={() => {
-                            setFilterTerm('');
-                            setSortBy('creationDate');
-                            setSortDirection('desc');
-                            setFilterError('');
+                            dispatch({ type: TODO_ACTIONS.RESET_FILTERS })
                         }}
                     >Reset Filters</button>
                 </div>
