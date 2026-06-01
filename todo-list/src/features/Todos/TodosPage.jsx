@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useReducer } from 'react';
+import { useEffect, useCallback, useReducer } from 'react';
 import TodoList from '../Todos/TodoList/TodoList.jsx';
 import TodoForm from './TodoForm.jsx';
 import SortBy from '../../shared/SortBy.jsx';
@@ -24,12 +24,9 @@ function TodosPage({ token }) {
 
     const invalidateCache = useCallback(() => {
         dispatch({
-            type: TODO_ACTIONS.UPDATE_TODO,
-            payload: {
-                dataVersion: state.dataVersion + 1,
-            },
+            type: TODO_ACTIONS.INVALIDATE_CACHE,
         });
-    }, [dispatch, state.dataVersion]);
+    }, [dispatch]);
 
     const handlerFilterChange = (newTerm) => {
         dispatch({
@@ -45,7 +42,10 @@ function TodosPage({ token }) {
             isCompleted: false,
         };
 
-        setTodoList((prevTodos) => [tempTodo, ...prevTodos]);
+        dispatch({
+            type: TODO_ACTIONS.ADD_TODO_START,
+            payload: tempTodo,
+        });
 
         try {
             const response = await fetch('/api/tasks', {
@@ -69,17 +69,18 @@ function TodosPage({ token }) {
 
             const newTask = data.task || data;
 
-            setTodoList(prev =>
-                prev.map(todo =>
-                    todo.id === tempTodo.id ? newTask : todo
-                )
-            );
-        } catch (error) {
-            setTodoList((prevTodos) =>
-                prevTodos.filter((todo) => todo.id !== tempTodo.id)
-            );
+            dispatch({
+                type: TODO_ACTIONS.ADD_TODO_SUCCESS,
+                payload: newTask,
+                tempId: tempTodo.id,
+            });
 
-            setError(error.message);
+        } catch (error) {
+            dispatch({
+                type: TODO_ACTIONS.ADD_TODO_ERROR,
+                payload: error.message,
+                tempId: tempTodo.id,
+            });
         }
         invalidateCache();
     }
@@ -100,7 +101,10 @@ function TodosPage({ token }) {
             return todo;
         });
 
-        setTodoList(updatedTodos);
+        dispatch({
+            type: TODO_ACTIONS.COMPLETE_TODO,
+            payload: updatedTodos,
+        })
 
         try {
             const response = await fetch(`/api/tasks/${id}`, {
@@ -120,13 +124,13 @@ function TodosPage({ token }) {
                 throw new Error('Failed to complete todo');
             }
         } catch (error) {
-            setTodoList((prevTodos) =>
-                prevTodos.map((todo) =>
-                    todo.id === id ? originalTodo : todo
-                )
-            );
+            // setTodoList((prevTodos) =>
+            //     prevTodos.map((todo) =>
+            //         todo.id === id ? originalTodo : todo
+            //     )
+            // );
 
-            setError(error.message);
+            // setError(error.message);
         }
         invalidateCache();
     }
@@ -144,7 +148,10 @@ function TodosPage({ token }) {
             return todo;
         });
 
-        setTodoList(updatedTodos);
+        dispatch({
+            type: TODO_ACTIONS.UPDATE_TODO,
+            payload: updatedTodos,
+        });
 
         try {
             const response = await fetch(
@@ -168,15 +175,15 @@ function TodosPage({ token }) {
                 throw new Error('Failed to update todo');
             }
         } catch (error) {
-            setTodoList((prevTodos) =>
-                prevTodos.map((todo) =>
-                    todo.id === originalTodo.id
-                        ? originalTodo
-                        : todo
-                )
-            );
+            // setTodoList((prevTodos) =>
+            //     prevTodos.map((todo) =>
+            //         todo.id === originalTodo.id
+            //             ? originalTodo
+            //             : todo
+            //     )
+            // );
 
-            setError(error.message);
+            // setError(error.message);
         }
         invalidateCache();
     }
@@ -216,18 +223,17 @@ function TodosPage({ token }) {
                 });
             } catch (error) {
                 if (debouncedFilterTerm || sortBy !== 'creationDate' || sortDirection !== 'desc') {
-                    setFilterError(
-                        `Error filtering/sorting todos: ${error.message}`
-                    );
+                    dispatch({
+                        type: TODO_ACTIONS.FETCH_ERROR,
+                        payload: `Error filtering/sorting todos: ${error.message}`,
+                    });
                 } else {
                     dispatch({
                         type: TODO_ACTIONS.FETCH_ERROR,
                         payload: error.message,
                     });
                 }
-            } finally {
-                setIsTodoListLoading(false);
-            }
+            };
         }
         if (token) {
             fetchTodos();
@@ -249,7 +255,7 @@ function TodosPage({ token }) {
             {filterError && (
                 <div>
                     <p>{filterError}</p>
-                    <button onClick={() => setFilterError('')}>Clear Filter Error</button>
+                    <button onClick={() => dispatch({type: TODO_ACTIONS.CLEAR_ERROR})}>Clear Filter Error</button>
                     <button
                         onClick={() => {
                             dispatch({ type: TODO_ACTIONS.RESET_FILTERS })
@@ -265,8 +271,24 @@ function TodosPage({ token }) {
             <SortBy
                 sortBy={sortBy}
                 sortDirection={sortDirection}
-                onSortByChange={setSortBy}
-                onSortDirectionChange={setSortDirection}
+                onSortByChange={(value) =>
+                    dispatch({
+                        type: TODO_ACTIONS.SET_SORT,
+                        payload: {
+                            sortBy: value,
+                            sortDirection,
+                        },
+                    })
+                }
+                onSortDirectionChange={(value) =>
+                    dispatch({
+                        type: TODO_ACTIONS.SET_SORT,
+                        payload: {
+                            sortBy,
+                            sortDirection: value,
+                        },
+                    })
+                }
             />
 
             <FilterInput

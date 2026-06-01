@@ -13,7 +13,9 @@ export const TODO_ACTIONS = {
     SET_SORT: 'SET_SORT',
     SET_FILTER: 'SET_FILTER',
     CLEAR_ERROR: 'CLEAR_ERROR',
-    RESET_FILTERS: 'RESET_FILTERS'
+    RESET_FILTERS: 'RESET_FILTERS',
+
+    INVALIDATE_CACHE: 'INVALIDATE_CACHE'
 }
 
 export const initialTodoState = {
@@ -22,7 +24,7 @@ export const initialTodoState = {
     filterError: '',
     isTodoListLoading: true,
     sortBy: 'creationDate',
-    sortDirection: 'asc',
+    sortDirection: 'desc',
     filterTerm: '',
     dataVersion: 0
 }
@@ -115,6 +117,12 @@ export function todoReducer(state, action) {
                 sortBy: 'creationDate',
                 sortDirection: 'desc',
                 filterError: '',
+            };
+
+        case TODO_ACTIONS.INVALIDATE_CACHE:
+            return {
+                ...state,
+                dataVersion: state.dataVersion + 1,
             };
         
         default:
