@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { Routes, Route } from "react-router";
-import { Header } from "./shared/Header";
+import HomePage from './pages/HomePage';
+import AboutPage  from "./pages/AboutPage";
+import LoginPage  from "./pages/LoginPage";
+import TodosPage  from "./pages/TodosPage";
+import ProfilePage  from './pages/ProfilePage';
+import NotFoundPage  from './pages/NotFoundPage';
+import RequireAuth  from './components/RequireAuth';
+import Header from "./shared/Header";
 import './App.css'
 
 function App() {
@@ -12,7 +19,12 @@ function App() {
     <>
       <Header />
       <Routes>
-        {}
+        <Route />
+        <Route />
+        <Route />
+        <Route />
+        <Route />
+        <Route />
       </Routes>
     </>
   );
