@@ -3,92 +3,67 @@ import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 
 function LoginPage() {
-    const { login, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
+  const { login, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const from = location.state?.from?.pathname || '/todos';
+  const from = location.state?.from?.pathname || '/todos';
 
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate(from, { replace: true });
-        }
-    }, [isAuthenticated, navigate, from]);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [isLoggingOn, setIsLoggingOn] = useState(false);
+  const [authError, setAuthError] = useState('');
 
-    async function handleSubmit(e) {
-        e.preventDefault();
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, navigate, from]);
 
-        setIsLoggingOn(true);
-        setAuthError('');
+  async function handleSubmit(e) {
+    e.preventDefault();
 
-        try {
-            const response = await fetch('/api/users/logon', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                credentials: 'include',
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            });
+    setIsLoggingOn(true);
+    setAuthError('');
 
-            const data = await response.json();
+    const result = await login(email, password);
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Invalid credentials');
-            }
-
-            onSetEmail(data.name);
-            onSetToken(data.csrfToken);
-
-        } catch (error) {
-            setAuthError(error.message);
-        } finally {
-            setIsLoggingOn(false);
-        }
+    if (!result.success) {
+      setAuthError(result.error);
     }
 
-    return (
-        <section>
-            <h2>Log On</h2>
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="email">Email</label>
-                    <input
-                        type="email"
-                        id='email'
-                        value={email}
-                        onChange={(e) =>
-                            setEmail(e.target.value)
-                        }
-                        required
-                    />
-                </div>
+    setIsLoggingOn(false);
+  }
 
-                <div>
-                    <label htmlFor="password"> Password </label>
-                    <input
-                        type="password"
-                        id='password'
-                        value={password}
-                        onChange={(event) =>
-                            setPassword(event.target.value)
-                        }
-                        required
-                    />
-                </div>
-                {authError && <p>{authError}</p>}
+  return (
+    <section>
+      <h2>Login</h2>
 
-                <button type='submit'
-                    disabled={isLoggingOn}
-                >
-                    {isLoggingOn ? 'Logging On...' : 'Log On'}
-                </button>
-            </form>
-        </section>
-    )
+      <form onSubmit={handleSubmit}>
+        <input
+          type='email'
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder='Email'
+          required
+        />
+
+        <input
+          type='password'
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder='Password'
+          required
+        />
+
+        {authError && <p>{authError}</p>}
+
+        <button disabled={isLoggingOn}>
+          {isLoggingOn ? 'Logging in...' : 'Log In'}
+        </button>
+      </form>
+    </section>
+  );
 }
 
 export default LoginPage;
