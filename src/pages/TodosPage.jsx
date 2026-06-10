@@ -1,6 +1,6 @@
 import { useEffect, useCallback, useReducer } from 'react';
 import TodoList from '../features/Todos/TodoList/TodoList.jsx';
-import TodoForm from '../features/Todos/TodoForm.jsx';
+import TodoForm from './features/Todos/TodoForm.jsx';
 import SortBy from '../shared/SortBy.jsx';
 import useDebounce from '../utils/useDebounce.js';
 import FilterInput from '../shared/FilterInput.jsx';
