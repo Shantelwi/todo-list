@@ -1,12 +1,14 @@
 import { useEffect, useCallback, useReducer } from 'react';
 import TodoList from '../features/Todos/TodoList/TodoList.jsx';
-import TodoForm from './features/Todos/TodoForm.jsx';
+import TodoForm from '../features/Todos/TodoForm.jsx';
 import SortBy from '../shared/SortBy.jsx';
 import useDebounce from '../utils/useDebounce.js';
 import FilterInput from '../shared/FilterInput.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx'
 import { todoReducer, initialTodoState, TODO_ACTIONS } from "../reducers/todoReducer.js";
 
-function TodosPage({ token }) {
+function TodosPage({  }) {
+    const { token } = useAuth();
     const [state, dispatch] = useReducer(todoReducer, initialTodoState);
 
     const {
@@ -124,13 +126,6 @@ function TodosPage({ token }) {
                 throw new Error('Failed to complete todo');
             }
         } catch (error) {
-            // setTodoList((prevTodos) =>
-            //     prevTodos.map((todo) =>
-            //         todo.id === id ? originalTodo : todo
-            //     )
-            // );
-
-            // setError(error.message);
         }
         invalidateCache();
     }
@@ -159,6 +154,7 @@ function TodosPage({ token }) {
                 {
                     method: 'PATCH',
                     headers: {
+                        
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': token,
                     },
@@ -175,15 +171,6 @@ function TodosPage({ token }) {
                 throw new Error('Failed to update todo');
             }
         } catch (error) {
-            // setTodoList((prevTodos) =>
-            //     prevTodos.map((todo) =>
-            //         todo.id === originalTodo.id
-            //             ? originalTodo
-            //             : todo
-            //     )
-            // );
-
-            // setError(error.message);
         }
         invalidateCache();
     }
