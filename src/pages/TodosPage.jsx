@@ -7,7 +7,7 @@ import FilterInput from '../shared/FilterInput.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { todoReducer, initialTodoState, TODO_ACTIONS } from "../reducers/todoReducer.js";
 
-function TodosPage({  }) {
+function TodosPage() {
     const { token } = useAuth();
     const [state, dispatch] = useReducer(todoReducer, initialTodoState);
 
@@ -86,7 +86,6 @@ function TodosPage({  }) {
         }
         invalidateCache();
     }
-
     async function completeTodo(id) {
         const originalTodo = todoList.find(
             (todo) => todo.id === id
@@ -109,6 +108,13 @@ function TodosPage({  }) {
         })
 
         try {
+            const payload = {
+                title: originalTodo.title,
+                isCompleted: true,
+            };
+
+            console.log(payload);
+
             const response = await fetch(`/api/tasks/${id}`, {
                 method: 'PATCH',
                 headers: {
@@ -116,13 +122,11 @@ function TodosPage({  }) {
                     'X-CSRF-TOKEN': token,
                 },
                 credentials: 'include',
-                body: JSON.stringify({
-                    isCompleted: true,
-                    createdAt: originalTodo.createdAt
-                }),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
+                const errorData = await response.json();
                 throw new Error('Failed to complete todo');
             }
         } catch (error) {
@@ -154,7 +158,7 @@ function TodosPage({  }) {
                 {
                     method: 'PATCH',
                     headers: {
-                        
+
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': token,
                     },
@@ -162,7 +166,6 @@ function TodosPage({  }) {
                     body: JSON.stringify({
                         title: editedTodo.title,
                         isCompleted: editedTodo.isCompleted,
-                        createdAt: originalTodo.createdAt
                     }),
                 }
             );
@@ -233,7 +236,7 @@ function TodosPage({  }) {
                 <div>
                     <p>{error}</p>
 
-                    <button onClick={() => dispatch({type: TODO_ACTIONS.CLEAR_ERROR})}>
+                    <button onClick={() => dispatch({ type: TODO_ACTIONS.CLEAR_ERROR })}>
                         Clear Error
                     </button>
                 </div>
@@ -242,7 +245,7 @@ function TodosPage({  }) {
             {filterError && (
                 <div>
                     <p>{filterError}</p>
-                    <button onClick={() => dispatch({type: TODO_ACTIONS.CLEAR_ERROR})}>Clear Filter Error</button>
+                    <button onClick={() => dispatch({ type: TODO_ACTIONS.CLEAR_ERROR })}>Clear Filter Error</button>
                     <button
                         onClick={() => {
                             dispatch({ type: TODO_ACTIONS.RESET_FILTERS })
