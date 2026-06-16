@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
 
 function ProfilePage() {
-    const { user, token } = useAuth;
+    const { user, token } = useAuth();
 
     const [todoStats, setTodoStats] = useState({
         total: 0,
@@ -32,7 +32,10 @@ function ProfilePage() {
                     throw new Error('Failed to fetch todos');
                 }
 
-                const todos = await response.json();
+                const data = await response.json();
+
+                const todos = data.tasks;
+
                 const total = todos.length;
                 const completed = todos.filter(
                     (todo) => todo.isCompleted
@@ -52,13 +55,13 @@ function ProfilePage() {
             }
         }
         fetchTodoStats();
-    }, [token]);
+    }, [token, user]);
 
     return(
         <div>
             <h2>Profile</h2>
 
-            <p>Name: {user?.name}</p>
+            <p>{user}</p>
 
             {loading && <p>Loading statistics...</p>}
 

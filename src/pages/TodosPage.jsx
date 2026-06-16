@@ -1,3 +1,5 @@
+import { useSearchParams } from 'react-router';
+import StatusFilter from '../shared/StatusFilter.jsx';
 import { useEffect, useCallback, useReducer } from 'react';
 import TodoList from '../features/Todos/TodoList/TodoList.jsx';
 import TodoForm from '../features/Todos/TodoForm.jsx';
@@ -8,6 +10,9 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { todoReducer, initialTodoState, TODO_ACTIONS } from "../reducers/todoReducer.js";
 
 function TodosPage() {
+    const [searchParams] = useSearchParams();
+    const statusFilter = searchParams.get('status') || 'all';
+
     const { token } = useAuth();
     const [state, dispatch] = useReducer(todoReducer, initialTodoState);
 
@@ -112,8 +117,6 @@ function TodosPage() {
                 title: originalTodo.title,
                 isCompleted: true,
             };
-
-            console.log(payload);
 
             const response = await fetch(`/api/tasks/${id}`, {
                 method: 'PATCH',
@@ -281,6 +284,8 @@ function TodosPage() {
                 }
             />
 
+            <StatusFilter />
+
             <FilterInput
                 filterTerm={filterTerm}
                 onFilterChange={handlerFilterChange}
@@ -293,6 +298,7 @@ function TodosPage() {
                 dataVersion={dataVersion}
                 onCompleteTodo={completeTodo}
                 onUpdateTodo={updateTodo}
+                statusFilter={statusFilter}
             />
         </div>
     );
