@@ -17,16 +17,6 @@ A modern Todo web application built with **React**, featuring authentication, pr
 
 ---
 
-## 📸 Preview
-
-> Add screenshots or a GIF of your application here.
-
-```md
-![Todo App Preview](./screenshots/todo-preview.png)
-```
-
----
-
 ## 🧠 Features
 
 ### 🔐 Authentication System
