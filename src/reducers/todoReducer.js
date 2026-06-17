@@ -30,9 +30,9 @@ export const initialTodoState = {
 }
 
 export function todoReducer(state, action) {
-    switch (action.type ) {
+    switch (action.type) {
         case TODO_ACTIONS.FETCH_START:
-            return{
+            return {
                 ...state,
                 isTodoListLoading: true,
                 error: '',
@@ -40,37 +40,39 @@ export function todoReducer(state, action) {
             };
 
         case TODO_ACTIONS.FETCH_SUCCESS:
-            return{
+            return {
                 ...state,
-                todoList: action.payload,
+                todoList: Array.isArray(action.payload) ? action.payload : [],
                 isTodoListLoading: false,
                 filterError: '',
             };
 
         case TODO_ACTIONS.FETCH_ERROR:
-            return{
+            return {
                 ...state,
                 isTodoListLoading: false,
                 error: action.payload,
             };
 
         case TODO_ACTIONS.ADD_TODO_START:
-            return{
+            return {
                 ...state,
                 todoList: [action.payload, ...state.todoList],
                 error: '',
             };
 
         case TODO_ACTIONS.ADD_TODO_SUCCESS:
-            return{
+            return {
                 ...state,
-                todoList: state.todoList.map((todo) =>
-                    todo.id === action.tempId ? action.payload : todo 
+                todoList: state.todoList.map(todo =>
+                    todo.id === action.tempId
+                        ? { ...action.payload }
+                        : todo
                 ),
             };
 
         case TODO_ACTIONS.ADD_TODO_ERROR:
-            return{
+            return {
                 ...state,
                 todoList: state.todoList.filter(
                     (todo) => todo.id !== action.tempId
@@ -79,43 +81,42 @@ export function todoReducer(state, action) {
             };
 
         case TODO_ACTIONS.COMPLETE_TODO:
-            return{
+            return {
                 ...state,
-                todoList: action.payload
+                todoList: state.todoList.map(todo =>
+                    todo.id === action.payload.id
+                        ? action.payload
+                        : todo
+                )
             };
 
         case TODO_ACTIONS.UPDATE_TODO:
-            return{
+            return {
                 ...state,
-                todoList: action.payload,
+                todoList: state.todoList.map(todo =>
+                    todo.id === action.payload.id
+                        ? action.payload
+                        : todo
+                )
             };
 
         case TODO_ACTIONS.SET_SORT:
-            return{
+            return {
                 ...state,
                 sortBy: action.payload.sortBy,
                 sortDirection: action.payload.sortDirection,
             };
 
         case TODO_ACTIONS.SET_FILTER:
-            return{
+            return {
                 ...state,
                 filterTerm: action.payload
             };
 
         case TODO_ACTIONS.CLEAR_ERROR:
-            return{
+            return {
                 ...state,
                 error: '',
-                filterError: '',
-            };
-            
-        case TODO_ACTIONS.RESET_FILTERS:
-            return{
-                ...state,
-                filterTerm: '',
-                sortBy: 'creationDate',
-                sortDirection: 'desc',
                 filterError: '',
             };
 
@@ -124,7 +125,18 @@ export function todoReducer(state, action) {
                 ...state,
                 dataVersion: state.dataVersion + 1,
             };
-        
+
+
+        case TODO_ACTIONS.RESET_FILTERS:
+            return {
+                ...state,
+                filterTerm: '',
+                sortBy: 'creationDate',
+                sortDirection: 'desc',
+                filterError: '',
+                dataVersion: state.dataVersion + 1,
+            }
+
         default:
             throw new Error(`Unknown action type: ${action.type}`);
     }

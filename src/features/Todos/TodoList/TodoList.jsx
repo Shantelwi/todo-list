@@ -2,40 +2,31 @@ import TodoListItem from './TodoListItem.jsx';
 import { useMemo } from 'react';
 
 function TodoList({
-  todoList,
+  todoList = [],
   dataVersion,
   onCompleteTodo,
   onUpdateTodo,
   statusFilter = 'all',
 }) {
-  const filteredTodos = (todoList || []).filter((todo) => {
-    if (statusFilter === 'active') {
-      return !todo.isCompleted;
-    }
 
-    if (statusFilter === 'completed') {
-      return todo.isCompleted;
-    }
-
-    return true;
-  });
   const filteredTodoList = useMemo(() => {
+
     let filteredTodos;
 
     switch (statusFilter) {
+
       case 'completed':
         filteredTodos = todoList.filter(
-          (todo) => todo.isCompleted
+          todo => todo.isCompleted
         );
         break;
 
       case 'active':
         filteredTodos = todoList.filter(
-          (todo) => !todo.isCompleted
+          todo => !todo.isCompleted
         );
         break;
 
-      case 'all':
       default:
         filteredTodos = todoList;
     }
@@ -44,10 +35,19 @@ function TodoList({
       version: dataVersion,
       todos: filteredTodos,
     };
+
   }, [todoList, dataVersion, statusFilter]);
 
+  if (filteredTodoList.todos.length === 0) {
+    return (
+      <p>
+        No todos yet. Add your first task!
+      </p>
+    );
+  }
+
   return (
-    <ul>
+    <>
       {filteredTodoList.todos.map((todo) => (
         <TodoListItem
           key={todo.id}
@@ -56,7 +56,7 @@ function TodoList({
           onUpdateTodo={onUpdateTodo}
         />
       ))}
-    </ul>
+    </>
   );
 }
 

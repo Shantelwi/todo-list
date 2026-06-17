@@ -10,11 +10,15 @@ import NotFoundPage from './pages/NotFoundPage';
 
 import RequireAuth from './components/RequireAuth';
 import Header from './shared/Header';
+import ThemeToggle from './components/ThemeToggle';
 
 function App() {
+  
   return (
     <>
       <Header />
+
+      <ThemeToggle />
 
       <Routes>
         <Route path='/' element={<HomePage />} />

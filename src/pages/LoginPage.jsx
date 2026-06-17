@@ -39,7 +39,7 @@ function LoginPage() {
     <section>
       <h2>Login</h2>
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className='login'>
         <input
           type='email'
           value={email}

@@ -18,7 +18,7 @@ function Logoff() {
     }
 
     return(
-        <button onClick={handleLogoff}>Log Out</button>
+        <button className="logoff" onClick={handleLogoff}>Log Out</button>
     );
 }
 

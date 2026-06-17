@@ -58,7 +58,7 @@ function ProfilePage() {
     }, [token, user]);
 
     return(
-        <div>
+        <div className="profilePage">
             <h2>Profile</h2>
 
             <p>{user}</p>
@@ -68,10 +68,21 @@ function ProfilePage() {
             {error && <p>{error}</p>}
 
             {!loading && !error && (
-                <>
-                    <p>Total Todos: {todoStats.total}</p>
-                    <p>Completed: {todoStats.completed}</p>
-                    <p>Active: {todoStats.active}</p>
+                <div className="stats">
+                    <div className="stat">
+                        <strong>{todoStats.total}</strong>
+                        <span>Total</span>
+                    </div>
+
+                    <div className="stat">
+                        <strong>{todoStats.completed}</strong>
+                        <span>Completed</span>
+                    </div>
+                    
+                    <div className="stat">
+                        <strong>{todoStats.active}</strong>
+                        <span>Active</span>
+                    </div>
 
                     {todoStats.total > 0 && (
                         <p>
@@ -84,7 +95,7 @@ function ProfilePage() {
                             %
                         </p>
                     )}
-                </>
+                </div>
             )}
         </div>
     );

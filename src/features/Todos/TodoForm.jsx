@@ -1,43 +1,61 @@
 import { useRef, useState } from 'react';
 import TextInputWithLabel from '../../shared/TextInputWithLabel.jsx';
 import { isValidTodoTitle } from '../../utils/todoValidation.js';
+import DOMPurify from 'dompurify';
 
- //create form submit handler
+const sanitizeInput = (input) => {
+  return DOMPurify.sanitize(input.trim(), {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  });
+};
+
 function TodoForm({ onAddTodo }) {
-    const inputRef = useRef();
-    const [workingTodoTitle, setWorkingTodoTitle] = useState('');
+  const inputRef = useRef();
 
-    function handleAddTodo (event) {
-        event.preventDefault();
+  const [workingTodoTitle, setWorkingTodoTitle] = useState('');
 
-        if (isValidTodoTitle(workingTodoTitle)) {
-            onAddTodo(workingTodoTitle);
-            setWorkingTodoTitle('');
+  function handleAddTodo(event) {
+    event.preventDefault();
 
-            if (inputRef.current){
-                inputRef.current.focus();
-            }
-        }
-    
+    if (!isValidTodoTitle(workingTodoTitle)) {
+      return;
+    }
 
-    };
-    return (
-        <form onSubmit={handleAddTodo}>
-            <TextInputWithLabel
-                elementId = "todoTitle"
-                labelText = "Todo"
-                // ref = {inputRef}
-                inputRef={inputRef}
-                value = {workingTodoTitle}
-                onChange = {(e) => setWorkingTodoTitle(e.target.value)}
-            />
+    const cleanTitle = sanitizeInput(workingTodoTitle);
 
-            <button
-                type = "submit"
-                disabled = {!isValidTodoTitle(workingTodoTitle)}
-            >Add Todo</button>
-        </form>
-    );
+    if (cleanTitle.length > 100) {
+      return;
+    }
+
+    onAddTodo(cleanTitle);
+
+    setWorkingTodoTitle('');
+
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }
+
+  return (
+    <form onSubmit={handleAddTodo}>
+      <TextInputWithLabel
+        elementId="todoTitle"
+        labelText="Todo"
+        inputRef={inputRef}
+        value={workingTodoTitle}
+        onChange={(e) => setWorkingTodoTitle(e.target.value)}
+        maxLength={100}
+      />
+
+      <button
+        type="submit"
+        disabled={!isValidTodoTitle(workingTodoTitle)}
+      >
+        Add Todo
+      </button>
+    </form>
+  );
 }
 
 export default TodoForm;

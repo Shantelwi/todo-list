@@ -10,7 +10,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { todoReducer, initialTodoState, TODO_ACTIONS } from "../reducers/todoReducer.js";
 
 function TodosPage() {
-    const [searchParams] = useSearchParams();
+    const [searchParams, setSearchParams] = useSearchParams();
     const statusFilter = searchParams.get('status') || 'all';
 
     const { token } = useAuth();
@@ -130,9 +130,13 @@ function TodosPage() {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error('Failed to complete todo');
+                throw new Error(errorData.message || 'Failed to complete todo');
             }
         } catch (error) {
+            dispatch({
+                type: TODO_ACTIONS.FETCH_ERROR,
+                payload: error.message,
+            });
         }
         invalidateCache();
     }
@@ -177,6 +181,10 @@ function TodosPage() {
                 throw new Error('Failed to update todo');
             }
         } catch (error) {
+            dispatch({
+                type: TODO_ACTIONS.FETCH_ERROR,
+                payload: error.message,
+            });
         }
         invalidateCache();
     }
@@ -234,7 +242,7 @@ function TodosPage() {
     }, [token, sortBy, sortDirection, debouncedFilterTerm, dataVersion]);
 
     return (
-        <div>
+        <div className='todosPage'>
             {error && (
                 <div>
                     <p>{error}</p>
@@ -284,7 +292,12 @@ function TodosPage() {
                 }
             />
 
-            <StatusFilter />
+            <StatusFilter
+                value = {statusFilter}
+                onChange={(newStatus) =>
+                    setSearchParams({ status: newStatus })
+                }
+            />
 
             <FilterInput
                 filterTerm={filterTerm}
