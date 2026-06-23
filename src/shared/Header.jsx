@@ -1,17 +1,22 @@
-import Navigation from "./Navigation";
-import Logoff from '../features/Logoff';
+import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router";
 
 function Header() {
+  const { isAuthenticated, logoff } = useAuth();
+  const navigate = useNavigate();
 
-    return (
-        <header>
-            <h1>Todo List</h1>
-            
-            <Navigation />
-            <Logoff />
+  function handleLogoff() {
+    logoff();
+    navigate("/login");
+  }
 
-        </header>
-    )
+  return (
+    <header>
+      <h1>Todo List</h1>
+
+      {isAuthenticated && <button onClick={handleLogoff}>Logoff</button>}
+    </header>
+  );
 }
 
 export default Header;

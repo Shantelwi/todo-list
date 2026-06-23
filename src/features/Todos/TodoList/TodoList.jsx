@@ -1,49 +1,38 @@
-import TodoListItem from './TodoListItem.jsx';
-import { useMemo } from 'react';
+import TodoListItem from "./TodoListItem.jsx";
+import { useMemo } from "react";
 
 function TodoList({
   todoList = [],
   dataVersion,
   onCompleteTodo,
   onUpdateTodo,
-  statusFilter = 'all',
+  statusFilter = "all",
 }) {
-
   const filteredTodoList = useMemo(() => {
-
     let filteredTodos;
 
     switch (statusFilter) {
-
-      case 'completed':
-        filteredTodos = todoList.filter(
-          todo => todo.isCompleted
-        );
+      case "completed":
+        filteredTodos = todoList.filter((todo) => todo.isCompleted);
         break;
 
-      case 'active':
-        filteredTodos = todoList.filter(
-          todo => !todo.isCompleted
-        );
+      case "active":
+        filteredTodos = todoList.filter((todo) => !todo.isCompleted);
         break;
 
+      case "all":
       default:
-        filteredTodos = todoList;
+        return true;
     }
 
     return {
       version: dataVersion,
       todos: filteredTodos,
     };
-
   }, [todoList, dataVersion, statusFilter]);
 
   if (filteredTodoList.todos.length === 0) {
-    return (
-      <p>
-        No todos yet. Add your first task!
-      </p>
-    );
+    return <p>No todos yet. Add your first task!</p>;
   }
 
   return (
